@@ -1,7 +1,50 @@
 print ("Loading custom keybinds")
 
---******************************************* My keybinds *******************************************
--- DAP keymap
+
+--******************************************* Primeagen *********************************************
+--colors
+-- vim.api.nvim_set_hl(0, "Normal", {bg="none"})
+-- vim.api.nvim_set_hl(0, "NormalFloat", {bg="none"})
+
+vim.keymap.set("n", "<leader>gs", vim.cmd.Git )	-- think of as git status
+
+--******************************************* Harpoon 2 setup ***************************************
+local harpoon = require("harpoon")
+harpoon:setup()
+
+-- basic telescope configuration
+local conf = require("telescope.config").values
+local function toggle_telescope(harpoon_files)
+    local file_paths = {}
+    for _, item in ipairs(harpoon_files.items) do
+        table.insert(file_paths, item.value)
+    end
+
+    require("telescope.pickers").new({}, {
+        prompt_title = "Harpoon",
+        finder = require("telescope.finders").new_table({
+            results = file_paths,
+        }),
+        previewer = conf.file_previewer({}),
+        sorter = conf.generic_sorter({}),
+    }):find()
+end
+
+vim.keymap.set("n", "<C-e>", function() toggle_telescope(harpoon:list()) end,
+    { desc = "Open harpoon window" })
+
+vim.keymap.set("n", "<leader>a", function() harpoon:list():add() end)
+vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+vim.keymap.set("n", "<C-h>", function() harpoon:list():select(1) end)
+vim.keymap.set("n", "<C-t>", function() harpoon:list():select(2) end)
+vim.keymap.set("n", "<C-n>", function() harpoon:list():select(3) end)
+vim.keymap.set("n", "<C-s>", function() harpoon:list():select(4) end)
+-- Toggle previous & next buffers stored within Harpoon list
+vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end)
+vim.keymap.set("n", "<C-S-N>", function() harpoon:list():next() end)
+
+--********************************************** Keybinds *******************************************
+-- DAP UI keymap
 vim.keymap.set('n', '<leader>dt', ':DapUiToggle<CR>', { desc = '[T]oggle DAP UI' })
 vim.keymap.set('n', '<leader>db', ':DapToggleBreakpoint<CR>', { desc = 'Toggle [B]reakpoint' })
 vim.keymap.set('n', '<leader>dc', ':DapContinue<CR>', { desc = 'DAP [C]ontinue' })
@@ -12,7 +55,6 @@ vim.keymap.set('n', '<leader>du', ':UndotreeToggle<CR>', { desc = 'Toggle Undotr
 
 -- telescope
 vim.keymap.set('n', '<leader>dp', ':Telescope<CR>', { desc = 'Toggle Telescope' })  --Primeagen -> <C-p>
---***************************************************************************************************
 
 -- Map arrow keys for insert mode. Temp disabled a couple of keybinds in luasnip for this.
 vim.keymap.set('i', '<C-h>', '<left>', { desc = 'Move left in insert mode' })
@@ -20,10 +62,9 @@ vim.keymap.set('i', '<C-j>', '<down>', { desc = 'Move down in insert mode' })
 vim.keymap.set('i', '<C-k>', '<up>', { desc = 'Move up in insert mode' })
 vim.keymap.set('i', '<C-l>', '<right>', { desc = 'Move right in insert mode' })
 
-
--- Start plugins?
+--******************************************* plugins / config *******************************************
 require('dapui').setup()
-require('go').setup() -- see line 164, listed dependency
+require('go').setup() -- listed as dependency for another
 require('nvim-dap-virtual-text').setup()
 require('null-ls').setup {
   debug = true,
@@ -92,7 +133,7 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 -- Configuration from https://github.com/mortepau/codicons.nvim?tab=readme-ov-file#configuration
 --require('codicons').setup {
 -- Override by mapping name to icon
---  ['account'] = '?',
+--  ['account'] = '',
 -- Or by name to hexadecimal/decimal value
 --  ['comment'] = 0xEA6B, -- hexadecimal
 --  ['archive'] = 60056, -- decimal
